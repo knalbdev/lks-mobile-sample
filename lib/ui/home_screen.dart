@@ -39,8 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildProductCard(Map product) {
     final nama = product['nama'].toString().toLowerCase();
-    final imagePathJpg = 'assets/images/$nama.jpg';
-    final imagePathPng = 'assets/images/$nama.png';
+    final imagePathJpg = 'assets/image/$nama.jpg';
+    final imagePathPng = 'assets/image/$nama.png';
 
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
