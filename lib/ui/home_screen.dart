@@ -37,20 +37,48 @@ class _HomeScreenState extends State<HomeScreen> {
     getProducts();
   }
 
+  Widget buildProductCard(Map product) {
+    final nama = product['nama'].toString().toLowerCase();
+    final imagePathJpg = 'assets/images/$nama.jpg';
+    final imagePathPng = 'assets/images/$nama.png';
+
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      elevation: 4,
+      child: ListTile(
+        leading: Image.asset(
+          imagePathJpg,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              imagePathPng,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(Icons.broken_image, size: 50);
+              },
+            );
+          },
+        ),
+        title: Text(product['nama']),
+        subtitle: Text('Rp${product['harga']} • Stok: ${product['stok']}'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Daftar Produk')),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final p = products[index];
-          return ListTile(
-            title: Text(p['nama']),
-            subtitle: Text('Rp${p['harga']} • Stok: ${p['stok']}'),
-          );
-        },
-      ),
+      body: products.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) => buildProductCard(products[index]),
+            ),
     );
   }
 }

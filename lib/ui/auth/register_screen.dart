@@ -39,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final response = await request.close();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.pop(context);
       } else {
         final body = await response.transform(utf8.decoder).join();
