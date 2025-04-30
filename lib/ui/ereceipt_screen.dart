@@ -30,7 +30,7 @@ class EReceiptScreen extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: Text("Share"),
-        content: Text("Ini teks e-receipt:\n\n$receipt"),
+        content: Text("Order Details:\n\n$receipt"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text("Tutup")),
         ],

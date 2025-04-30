@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:lks_mobile/ui/auth/login_screen.dart';
 import 'package:lks_mobile/ui/ereceipt_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,12 +17,17 @@ class _HomeScreenState extends State<HomeScreen> {
   List products = [];
   List<Map<String, dynamic>> selectedProducts = [];
 
+  @override
+  void initState() {
+    super.initState();
+    getProducts();
+  }
+
   void getProducts() async {
     final url = Uri.parse('http://10.0.2.2:8000/api/produk');
     final request = await HttpClient().getUrl(url);
     request.headers.set(HttpHeaders.acceptHeader, "application/json");
-    request.headers.set(
-        HttpHeaders.authorizationHeader, "Bearer ${widget.token}");
+    request.headers.set(HttpHeaders.authorizationHeader, "Bearer ${widget.token}");
 
     final response = await request.close();
     final responseBody = await response.transform(utf8.decoder).join();
@@ -34,10 +40,48 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getProducts();
+  void confirmLogout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Konfirmasi Logout"),
+        content: Text("Apakah Anda yakin ingin keluar?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Batal"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Tutup dialog
+              logout();
+            },
+            child: Text("Ya"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void logout() async {
+    final url = Uri.parse('http://10.0.2.2:8000/api/logout');
+    final request = await HttpClient().postUrl(url);
+    request.headers.set(HttpHeaders.acceptHeader, "application/json");
+    request.headers.set(HttpHeaders.authorizationHeader, "Bearer ${widget.token}");
+
+    final response = await request.close();
+    final responseBody = await response.transform(utf8.decoder).join();
+    final data = jsonDecode(responseBody);
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['message'] ?? 'Logout berhasil')),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+    }
   }
 
   Widget buildProductCard(Map product) {
@@ -90,7 +134,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Daftar Produk')),
+      appBar: AppBar(
+        title: Text('Daftar Produk'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: confirmLogout,
+          ),
+        ],
+      ),
       body: products.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -104,8 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        EReceiptScreen(selectedProducts: selectedProducts),
+                    builder: (_) => EReceiptScreen(selectedProducts: selectedProducts),
                   ),
                 );
               },
